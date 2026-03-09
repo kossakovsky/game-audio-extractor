@@ -36,6 +36,12 @@ mkdir -p "$OUTPUT_DIR"
 TOTAL=$(ls "$INPUT_DIR"/*.wav 2>/dev/null | wc -l | tr -d ' ')
 COUNT=0
 ERRORS=0
+SKIPPED=0
+
+if [[ "$TOTAL" -eq 0 ]]; then
+    echo "No .wav files found in $INPUT_DIR"
+    exit 0
+fi
 
 echo "Converting $TOTAL files..."
 echo ""
@@ -43,6 +49,11 @@ echo ""
 for f in "$INPUT_DIR"/*.wav; do
     COUNT=$((COUNT + 1))
     FILENAME=$(basename "$f")
+
+    if [[ -f "$OUTPUT_DIR/$FILENAME" ]]; then
+        SKIPPED=$((SKIPPED + 1))
+        continue
+    fi
 
     if vgmstream-cli -o "$OUTPUT_DIR/$FILENAME" "$f" > /dev/null 2>&1; then
         printf "\r[%d/%d] OK: %s" "$COUNT" "$TOTAL" "$FILENAME"
@@ -54,6 +65,6 @@ done
 
 echo ""
 echo ""
-echo "Done! Converted: $((COUNT - ERRORS)) of $TOTAL"
+echo "Done! Converted: $((COUNT - ERRORS - SKIPPED)), skipped: $SKIPPED of $TOTAL"
 echo "Errors: $ERRORS"
 echo "Output: $OUTPUT_DIR"

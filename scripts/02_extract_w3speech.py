@@ -74,8 +74,8 @@ def process_file(input_file, output_dir):
             print(f"  SKIP: invalid format ({magic})")
             return
 
-        version = struct.unpack("<I", f.read(4))[0]
-        key1 = struct.unpack("<H", f.read(2))[0]
+        f.read(4)  # version (uint32) — skip to advance offset
+        f.read(2)  # key1 (uint16) — skip to advance offset
 
         item_count = find_item_count(f, file_size)
         if item_count == 0:
@@ -123,7 +123,8 @@ def process_file(input_file, output_dir):
                     out.write(audio_data)
                 existing.add(name)
                 extracted += 1
-            except Exception:
+            except Exception as e:
+                print(f"  Error extracting {name}: {e}", file=sys.stderr)
                 errors += 1
 
         print(f"  Extracted: {extracted}, skipped: {skipped}, bad size: {bad_size}, errors: {errors}")

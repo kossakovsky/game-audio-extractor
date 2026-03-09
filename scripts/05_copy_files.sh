@@ -19,11 +19,15 @@ usage() {
     echo "Example:"
     echo "  $(basename "$0") my_files.txt"
     echo "  $(basename "$0") my_files.txt data/converted ~/output"
-    exit 0
+    exit "${1:-0}"
 }
 
-if [[ $# -lt 1 ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
     usage
+fi
+
+if [[ $# -lt 1 ]]; then
+    usage 1
 fi
 
 FILE_LIST="$1"

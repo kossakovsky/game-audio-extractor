@@ -53,7 +53,7 @@ def main():
         with open(args.log_file, "r", encoding="utf-8") as f:
             for line in f:
                 parts = line.strip().split("\t")
-                if len(parts) >= 2 and not line.startswith("No"):
+                if len(parts) >= 2 and parts[0].isdigit():
                     processed.add(parts[1])
         print(f"Already processed in log: {len(processed)} files")
 
@@ -81,24 +81,23 @@ def main():
         return
 
     os.makedirs(os.path.dirname(args.log_file), exist_ok=True)
-    log = open(args.log_file, "a", encoding="utf-8")
 
-    for i, (name, path, size) in enumerate(files, 1):
-        try:
-            result = model.transcribe(path, language=args.language)
-            text = result["text"].strip()
-        except Exception as e:
-            text = f"[ERROR: {e}]"
+    with open(args.log_file, "a", encoding="utf-8") as log:
+        for i, (name, path, size) in enumerate(files, 1):
+            try:
+                result = model.transcribe(path, language=args.language)
+                text = result["text"].strip()
+            except Exception as e:
+                text = f"[ERROR: {e}]"
 
-        size_kb = size / 1024
-        line = f"{len(processed) + i}\t{name}\t{size_kb:.1f} KB\t{text}"
+            size_kb = size / 1024
+            line = f"{len(processed) + i}\t{name}\t{size_kb:.1f} KB\t{text}"
 
-        print(f"[{i}/{total}] {name} ({size_kb:.1f} KB): {text}")
+            print(f"[{i}/{total}] {name} ({size_kb:.1f} KB): {text}")
 
-        log.write(line + "\n")
-        log.flush()
+            log.write(line + "\n")
+            log.flush()
 
-    log.close()
     print(f"\nDone! Log: {args.log_file}")
     print(f"Search example: grep -i 'keyword' {args.log_file}")
 

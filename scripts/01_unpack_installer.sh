@@ -16,11 +16,15 @@ usage() {
     echo ""
     echo "Requirements:"
     echo "  innoextract     Install via: brew install innoextract"
-    exit 1
+    exit "${1:-0}"
 }
 
-if [[ $# -lt 1 ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
     usage
+fi
+
+if [[ $# -lt 1 ]]; then
+    usage 1
 fi
 
 INSTALLER="$1"
